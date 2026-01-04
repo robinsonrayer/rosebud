@@ -80,6 +80,34 @@ export default function PuzzleRow({
         }
     };
 
+    // Unified character input handler
+    const handleCharInput = (char) => {
+        // If active index is locked, skip forward or block
+        if (lockedMask[cursorIndex]) {
+            if (cursorIndex < targetWord.length - 1) {
+                setCursorIndex(cursorIndex + 1);
+            }
+            return;
+        }
+
+        playSound('chisel');
+
+        let chars = inputVal.padEnd(targetWord.length, " ").split("");
+        chars[cursorIndex] = char.toUpperCase();
+        const newVal = chars.join("").trimEnd();
+        setInputVal(newVal);
+
+        // Verify Easter Egg
+        if (newVal === magicTarget) {
+            triggerRobi();
+        }
+
+        // Advance cursor
+        if (cursorIndex < targetWord.length - 1) {
+            setCursorIndex(cursorIndex + 1);
+        }
+    };
+
     const handleKeyDown = (e) => {
         if (!isUnlocked || isFullSolved) return;
 
@@ -95,23 +123,23 @@ export default function PuzzleRow({
 
         // Handle Backspace
         if (e.key === "Backspace") {
+            // ... (keep existing backspace logic as is, implicit via standard behavior or KeyDown)
+            // Wait, I need to preserve the backspace logic block below or copy it.
+            // Since I am replacing the block, I must preserve it. 
+            // Actually, the previous code block ended at line 122 for backspace, this replacement starts at 83.
+            // I need to include the Backspace logic in this replacement content.
+
             e.preventDefault();
             playSound('chisel');
 
-            // Logic: Delete current tile, THEN move back.
-            // Why? User wants "delete the current tile and move the one behind".
-            // Implementation: Clear current index. If we can move back, move back.
-
             let chars = inputVal.padEnd(targetWord.length, " ").split("");
-            const hasChar = chars[cursorIndex] !== " ";
 
-            // If locked, we can't delete. 
-            // If current index is unlocked, clear it.
+            // If unlocked, clear current
             if (!lockedMask[cursorIndex]) {
                 chars[cursorIndex] = " ";
             }
 
-            // Move cursor back if possible
+            // Move cursor back
             if (cursorIndex > 0) {
                 setCursorIndex(cursorIndex - 1);
             }
@@ -121,52 +149,27 @@ export default function PuzzleRow({
             return;
         }
 
-        // Handle Letters
+        // Handle Letters (Desktop)
         if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
             e.preventDefault();
-            const char = e.key.toUpperCase();
-
-            // If active index is locked, we can't write here. Move to next?
-            // Or just block.
-            if (lockedMask[cursorIndex]) {
-                // Skip forward if possible
-                if (cursorIndex < targetWord.length - 1) {
-                    setCursorIndex(cursorIndex + 1);
-                    // Retry logic? For now just move.
-                }
-                return;
-            }
-
-            playSound('chisel');
-
-            let chars = inputVal.padEnd(targetWord.length, " ").split("");
-            chars[cursorIndex] = char;
-            const newVal = chars.join("").trimEnd();
-            setInputVal(newVal);
-
-            // Verify Easter Egg on new value
-            if (newVal === magicTarget) {
-                triggerRobi();
-            }
-
-            // Advance cursor
-            if (cursorIndex < targetWord.length - 1) {
-                setCursorIndex(cursorIndex + 1);
-            }
+            handleCharInput(e.key);
         }
     };
 
-    // Handle Input Change (Fallback mainly, but we rely on KeyDown for overwrite control)
+    // Handle Input Change (Mobile Virtual Keyboard)
     const handleChange = (e) => {
-        // No-op or sync for mobile virtual keyboard?
-        // Mobile VK sends input events, not always KeyDown.
-        // This is the tricky part. For full overwrite, we might need to rely on this change event if KeyDown fails.
-        // Simplifying: Let's assume KeyDown works for desktop. 
-        // For mobile, we might need a different approach or just accept standard insert behavior.
+        const val = e.target.value;
+        if (!val) return;
 
-        // Fallback for simple typing if needed:
-        // const raw = e.target.value.toUpperCase();
-        // setInputVal(raw); -- This breaks the overwrite logic.
+        // Extract last char (assuming append)
+        const char = val.slice(-1);
+        if (/[a-zA-Z]/.test(char)) {
+            handleCharInput(char);
+        }
+
+        // Note: The input value will be reset to "" by React render because 'value' prop is controlled (or fixed to "").
+        // However, forcing a reset here might be cleaner if the controlled flow lags.
+        // But since we pass value="" in render, it should snap back.
     };
 
     const triggerRobi = () => {
@@ -285,7 +288,7 @@ export default function PuzzleRow({
                 // Actually, for mobile VK, we need the value to be there to delete?
                 // Let's keep it simple: We use the input as a focus trap mostly.
                 value=""
-                onChange={() => { }} // No-op, managed by KeyDown
+                onChange={handleChange}
                 onKeyDown={handleKeyDown}
                 disabled={isFullSolved}
                 autoComplete="off"
