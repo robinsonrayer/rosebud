@@ -8,12 +8,13 @@ export default function DragSlider({ onSubmit, disabled = false }) {
     const backgroundOpacity = useTransform(x, [0, 100], [0.1, 0.5]);
     const [isDragging, setIsDragging] = useState(false);
 
-    const handleDragEnd = (_, info) => {
+    const handleDragEnd = () => {
         setIsDragging(false);
-        // Threshold to trigger submit (e.g., 100px or % of width)
-        // The container is w-32 (128px) minus padding/handle. 
-        // Let's say if dragged > 60px.
-        if (info.offset.x > 60 && !disabled) {
+        const currentX = x.get();
+        // Check actual position (visual confirmation) rather than mouse delta
+        // Container roughly 160px, handle 48px, travel ~112px.
+        // Threshold 50px is safe ~45% travel.
+        if (currentX > 50 && !disabled) {
             onSubmit();
         }
     };
