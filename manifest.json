@@ -1,0 +1,16 @@
+{
+    "name": "Rosebud",
+    "short_name": "Rosebud",
+    "description": "A personal puzzle game for Jessica.",
+    "start_url": "/rosebud/",
+    "display": "standalone",
+    "background_color": "#1c1917",
+    "theme_color": "#d6af48",
+    "icons": [
+        {
+            "src": "/rosebud/rose_icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}
