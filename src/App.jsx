@@ -117,7 +117,6 @@ export default function App() {
       {/* Footer / Credits */}
       <footer className="w-full py-8 text-center text-stone-600 font-serif text-sm">
         <p>For Jessica</p>
-        <p className="text-[10px] mt-2 opacity-50">Private Personal Project. No data collection.</p>
       </footer>
     </div>
   );
